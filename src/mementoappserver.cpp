@@ -127,7 +127,7 @@ AppServerTsx* MementoAppServer::get_app_tsx(AppServerTsxHelper* helper,
 
   // Check for available tokens on the initial request
   if ((req->line.req.method.id == PJSIP_INVITE_METHOD) &&
-      (!_load_monitor->admit_request()))
+      (!_load_monitor->admit_request(helper->trail())))
   {
     // LCOV_EXCL_START
     TRC_WARNING("No available tokens - no memento processing of request");
