@@ -76,7 +76,7 @@ TEST_F(HttpNotifierTest, Notify)
 {
   bool ret = _http_notifier.send_notify("user@domain", 0);
   EXPECT_TRUE(ret);
-  Request& req = fakecurl_requests["http://10.42.42.42:80/notify"];
+  Request& req = fakecurl_requests["http://notification.domain:80/notify"];
   EXPECT_EQ("POST", req._method);
   EXPECT_EQ("{\"impu\":\"user@domain\"}", req._body);
 }

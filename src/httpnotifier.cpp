@@ -45,9 +45,10 @@ HttpNotifier::HttpNotifier(HttpResolver* resolver, const std::string& notify_url
   _http_resolver(resolver),
   _http_connection(NULL)
 {
+  std::string url_scheme;
   std::string url_server;
   std::string url_path;
-  if (Utils::parse_http_url(notify_url, url_server, url_path) &&
+  if (Utils::parse_http_url(notify_url, url_scheme, url_server, url_path) &&
       !url_server.empty())
   {
     _http_connection = new HttpConnection(url_server,
