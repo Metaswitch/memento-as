@@ -325,7 +325,7 @@ TEST_F(MementoAppServerTest, MainlineIncomingTest)
   std::string service_name = "memento";
   std::string home_domain = "home.domain";
   MementoAppServerTsx as_tsx(_clsp, service_name, home_domain);
-  as_tsx.init_tsx(_helper);
+  as_tsx.set_helper(_helper);
 
   // Message is parsed successfully.
   EXPECT_CALL(*_helper, add_to_dialog(_));
@@ -356,7 +356,7 @@ TEST_F(MementoAppServerTest, MainlineOutgoingTest)
   std::string service_name = "memento";
   std::string home_domain = "home.domain";
   MementoAppServerTsx as_tsx(_clsp, service_name, home_domain);
-  as_tsx.init_tsx(_helper);
+  as_tsx.set_helper(_helper);
 
   pjsip_msg* req = parse_msg(msg.get_request());
 
@@ -400,7 +400,7 @@ TEST_F(MementoAppServerTest, OnResponseRecordAnswerer)
   std::string service_name = "memento";
   std::string home_domain = "home.domain";
   MementoAppServerTsx as_tsx(_clsp, service_name, home_domain);
-  as_tsx.init_tsx(_helper);
+  as_tsx.set_helper(_helper);
 
   pjsip_msg* req = parse_msg(msg.get_request());
 
@@ -452,7 +452,7 @@ TEST_F(MementoAppServerTest, OnResponseNotRecordPrivateAnswerer)
   std::string service_name = "memento";
   std::string home_domain = "home.domain";
   MementoAppServerTsx as_tsx(_clsp, service_name, home_domain);
-  as_tsx.init_tsx(_helper);
+  as_tsx.set_helper(_helper);
 
   pjsip_msg* req = parse_msg(msg.get_request());
 
@@ -509,7 +509,7 @@ TEST_F(MementoAppServerTest, OutgoingMissingPAssertedHeaderTest)
   std::string service_name = "memento";
   std::string home_domain = "home.domain";
   MementoAppServerTsx as_tsx(_clsp, service_name, home_domain);
-  as_tsx.init_tsx(_helper);
+  as_tsx.set_helper(_helper);
 
   // Add a P-Served-User header.
   pjsip_msg* req = parse_msg(msg.get_request());
@@ -531,7 +531,7 @@ TEST_F(MementoAppServerTest, OnNonFinalResponse)
   std::string service_name = "memento";
   std::string home_domain = "home.domain";
   MementoAppServerTsx as_tsx(_clsp, service_name, home_domain);
-  as_tsx.init_tsx(_helper);
+  as_tsx.set_helper(_helper);
 
   EXPECT_CALL(*_helper, add_to_dialog(_));
   EXPECT_CALL(*_helper, send_request(_)).WillOnce(Return(0));
@@ -550,7 +550,7 @@ TEST_F(MementoAppServerTest, OnMultipleResponses)
   std::string service_name = "memento";
   std::string home_domain = "home.domain";
   MementoAppServerTsx as_tsx(_clsp, service_name, home_domain);
-  as_tsx.init_tsx(_helper);
+  as_tsx.set_helper(_helper);
 
   EXPECT_CALL(*_helper, add_to_dialog(_));
   EXPECT_CALL(*_helper, send_request(_)).WillOnce(Return(0));
@@ -574,7 +574,7 @@ TEST_F(MementoAppServerTest, OnNonInviteResponse)
   std::string service_name = "memento";
   std::string home_domain = "home.domain";
   MementoAppServerTsx as_tsx(_clsp, service_name, home_domain);
-  as_tsx.init_tsx(_helper);
+  as_tsx.set_helper(_helper);
 
   EXPECT_CALL(*_helper, add_to_dialog(_));
   EXPECT_CALL(*_helper, send_request(_)).WillOnce(Return(0));
@@ -592,7 +592,7 @@ TEST_F(MementoAppServerTest, OnErrorResponse)
   std::string service_name = "memento";
   std::string home_domain = "home.domain";
   MementoAppServerTsx as_tsx(_clsp, service_name, home_domain);
-  as_tsx.init_tsx(_helper);
+  as_tsx.set_helper(_helper);
 
   EXPECT_CALL(*_helper, add_to_dialog(_));
   EXPECT_CALL(*_helper, send_request(_)).WillOnce(Return(0));
@@ -622,7 +622,7 @@ TEST_F(MementoAppServerWithDialogIDTest, OnInDialogRequestTest)
 
   // Intial INVITE transaction
   MementoAppServerTsx as_tsx_initial(_clsp, service_name, home_domain);
-  as_tsx_initial.init_tsx(_helper);
+  as_tsx_initial.set_helper(_helper);
 
   // Message is parsed successfully. The on_initial_request method
   // adds a Record-Route header.
@@ -639,7 +639,7 @@ TEST_F(MementoAppServerWithDialogIDTest, OnInDialogRequestTest)
 
   // In dialog reINVITE transaction
   MementoAppServerTsx as_tsx_during(_clsp, service_name, home_domain);
-  as_tsx_during.init_tsx(_helper);
+  as_tsx_during.set_helper(_helper);
 
   // On a reINVITE in dialog request, nothing is written to the store
   EXPECT_CALL(*_helper, send_request(_)).WillOnce(Return(0));
@@ -652,7 +652,7 @@ TEST_F(MementoAppServerWithDialogIDTest, OnInDialogRequestTest)
 
   // In dialog BYE transaction
   MementoAppServerTsx as_tsx_end(_clsp, service_name, home_domain);
-  as_tsx_end.init_tsx(_helper);
+  as_tsx_end.set_helper(_helper);
   msg._method = "BYE";
 
   // On a BYE in dialog request the as_tsx_initial generates an END call

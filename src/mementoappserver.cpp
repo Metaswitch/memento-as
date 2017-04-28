@@ -115,7 +115,7 @@ MementoAppServer::~MementoAppServer()
 
 // Returns an AppServerTsx if the load monitor admits the request, and if
 // the request is either an INVITE or a BYE.
-AppServerTsx* MementoAppServer::get_app_tsx(SproutletProxy* proxy,
+AppServerTsx* MementoAppServer::get_app_tsx(SproutletHelper* helper,
                                             pjsip_msg* req,
                                             pjsip_sip_uri*& next_hop,
                                             pj_pool_t* pool,
