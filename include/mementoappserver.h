@@ -102,11 +102,17 @@ public:
   /// does not want to process the request, or create a suitable object
   /// derived from the AppServerTsx class to process the request.
   ///
-  /// @param  helper        - The service helper to use to perform
-  ///                         the underlying service-related processing.
+  /// @param  helper        - The Sproutlet helper.
   /// @param  req           - The received request message.
-  virtual AppServerTsx* get_app_tsx(AppServerTsxHelper* helper,
-                                    pjsip_msg* req);
+  /// @param  next_hop      - The Sproutlet can use this field to specify a
+  ///                         next hop URI when it returns a NULL Tsx.
+  /// @param  pool          - The pool for creating the next_hop uri.
+  /// @param  trail         - The SAS trail id for the message.
+  virtual AppServerTsx* get_app_tsx(SproutletHelper* helper,
+                                    pjsip_msg* req,
+                                    pjsip_sip_uri*& next_hop,
+                                    pj_pool_t* pool,
+                                    SAS::TrailId trail);
 
 private:
 
@@ -169,8 +175,7 @@ public:
   virtual void on_response(pjsip_msg* rsp, int fork_id);
 
   /// Constructor.
-  MementoAppServerTsx(AppServerTsxHelper* helper,
-                      CallListStoreProcessor* call_list_store_processor,
+  MementoAppServerTsx(CallListStoreProcessor* call_list_store_processor,
                       std::string& service_name,
                       std::string& home_domain);
 

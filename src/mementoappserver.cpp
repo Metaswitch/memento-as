@@ -115,8 +115,11 @@ MementoAppServer::~MementoAppServer()
 
 // Returns an AppServerTsx if the load monitor admits the request, and if
 // the request is either an INVITE or a BYE.
-AppServerTsx* MementoAppServer::get_app_tsx(AppServerTsxHelper* helper,
-                                            pjsip_msg* req)
+AppServerTsx* MementoAppServer::get_app_tsx(SproutletHelper* helper,
+                                            pjsip_msg* req,
+                                            pjsip_sip_uri*& next_hop,
+                                            pj_pool_t* pool,
+                                            SAS::TrailId trail)
 {
   if ((req->line.req.method.id != PJSIP_INVITE_METHOD) &&
       (req->line.req.method.id != PJSIP_BYE_METHOD))
@@ -127,11 +130,11 @@ AppServerTsx* MementoAppServer::get_app_tsx(AppServerTsxHelper* helper,
 
   // Check for available tokens on the initial request
   if ((req->line.req.method.id == PJSIP_INVITE_METHOD) &&
-      (!_load_monitor->admit_request(helper->trail())))
+      (!_load_monitor->admit_request(trail)))
   {
     // LCOV_EXCL_START
     TRC_WARNING("No available tokens - no memento processing of request");
-    SAS::Event event(helper->trail(), SASEvent::CALL_LIST_OVERLOAD, 0);
+    SAS::Event event(trail, SASEvent::CALL_LIST_OVERLOAD, 0);
     SAS::report_event(event);
     _stat_calls_not_recorded_due_to_overload.increment();
     return NULL;
@@ -141,8 +144,7 @@ AppServerTsx* MementoAppServer::get_app_tsx(AppServerTsxHelper* helper,
   TRC_DEBUG("Getting a MementoAppServerTsx");
 
   MementoAppServerTsx* memento_tsx =
-                    new MementoAppServerTsx(helper,
-                                            _call_list_store_processor,
+                    new MementoAppServerTsx(_call_list_store_processor,
                                             _service_name,
                                             _home_domain);
   return memento_tsx;
@@ -150,11 +152,10 @@ AppServerTsx* MementoAppServer::get_app_tsx(AppServerTsxHelper* helper,
 
 // Constructor
 MementoAppServerTsx::MementoAppServerTsx(
-                     AppServerTsxHelper* helper,
                      CallListStoreProcessor* call_list_store_processor,
                      std::string& service_name,
                      std::string& home_domain) :
-    AppServerTsx(helper),
+    AppServerTsx(),
     _call_list_store_processor(call_list_store_processor),
     _service_name(service_name),
     _home_domain(home_domain),
