@@ -245,7 +245,7 @@ TEST_F(CallListStoreProcessorTest, CallListIsCountNeededNoLimit)
 
 TEST_F(CallListStoreProcessorTest, CallListWriteBegin)
 {
-  EXPECT_CALL(_load_monitor, request_complete(_)).Times(1);
+  EXPECT_CALL(_load_monitor, request_complete(_, _)).Times(1);
   EXPECT_CALL(*_http_notifier, send_notify(_, _)).Times(1);
 
   EXPECT_CALL(*_cls, write_call_fragment_sync(IMPU, _, _, CALL_LIST_TTL, FAKE_SAS_TRAIL)).WillOnce(Return(CassandraStore::ResultCode::OK));
@@ -255,7 +255,7 @@ TEST_F(CallListStoreProcessorTest, CallListWriteBegin)
 
 TEST_F(CallListStoreProcessorTest, CallListWriteEnd)
 {
-  EXPECT_CALL(_load_monitor, request_complete(_)).Times(1);
+  EXPECT_CALL(_load_monitor, request_complete(_, _)).Times(1);
   EXPECT_CALL(*_http_notifier, send_notify(_, _)).Times(1);
 
   EXPECT_CALL(*_cls, write_call_fragment_sync(IMPU, _, _, CALL_LIST_TTL, FAKE_SAS_TRAIL)).WillOnce(Return(CassandraStore::ResultCode::OK));
@@ -265,7 +265,7 @@ TEST_F(CallListStoreProcessorTest, CallListWriteEnd)
 
 TEST_F(CallListStoreProcessorTest, CallListWriteRejected)
 {
-  EXPECT_CALL(_load_monitor, request_complete(_)).Times(1);
+  EXPECT_CALL(_load_monitor, request_complete(_, _)).Times(1);
   EXPECT_CALL(*_http_notifier, send_notify(_, _)).Times(1);
 
   EXPECT_CALL(*_cls, write_call_fragment_sync(IMPU, _, _, CALL_LIST_TTL, FAKE_SAS_TRAIL)).WillOnce(Return(CassandraStore::ResultCode::OK));
@@ -275,7 +275,7 @@ TEST_F(CallListStoreProcessorTest, CallListWriteRejected)
 
 TEST_F(CallListStoreProcessorTest, CallListWriteWithError)
 {
-  EXPECT_CALL(_load_monitor, request_complete(_)).Times(1);
+  EXPECT_CALL(_load_monitor, request_complete(_, _)).Times(1);
   EXPECT_CALL(*_cls, write_call_fragment_sync(_, _, _, CALL_LIST_TTL, FAKE_SAS_TRAIL)).WillOnce(Return(CassandraStore::ResultCode::CONNECTION_ERROR));
   _clsp->write_call_list_entry(IMPU, TIMESTAMP, "id", CallListStore::CallFragment::Type::BEGIN, "xml", FAKE_SAS_TRAIL);
   sleep(1);
@@ -286,7 +286,7 @@ TEST_F(CallListStoreProcessorWithLimitTest, CallListWriteWithTrim)
   std::vector<CallListStore::CallFragment> records;
   create_records(records);
 
-  EXPECT_CALL(_load_monitor, request_complete(_)).Times(1);
+  EXPECT_CALL(_load_monitor, request_complete(_, _)).Times(1);
   EXPECT_CALL(*_http_notifier, send_notify(_, _)).Times(1);
   EXPECT_CALL(*_cls, write_call_fragment_sync(_, _, _, _, _)).WillOnce(Return(CassandraStore::ResultCode::OK));
   EXPECT_CALL(*_cls, get_call_fragments_sync(_,_,_)).WillOnce(DoAll(SetArgReferee<1>(records),
