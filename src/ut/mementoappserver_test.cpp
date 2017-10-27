@@ -261,6 +261,7 @@ TEST_F(MementoAppServerTest, CreateMementoAppServer)
                                                20,
                                                100.0,
                                                10.0,
+                                               0.0,
                                                NULL, // Exception Handler
                                                NULL, // HTTP Resolver
                                                "http://example.com/notify");
