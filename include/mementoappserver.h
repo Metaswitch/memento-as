@@ -52,6 +52,7 @@ public:
   /// @param  max_tokens             - Max number of tokens for the Cassandra load monitor (from configuration).
   /// @param  init_token_rate        - Initial token rate for the Cassandra load monitor (from configuration).
   /// @param  min_token_rate         - Minimum token rate for the Cassandra load monitor (from configuration).
+  /// @param  max_token_rate         - Maximum token rate for the Cassandra load monitor (from configuration).
   /// @param  http_resolver          - HTTP resolver to use for HTTP connections.
   /// @param  memento_notify_url     - HTTP URL that memento should notify when call lists change.
   MementoAppServer(const std::string& service_name,
@@ -65,6 +66,7 @@ public:
                    const int max_tokens,
                    const float init_token_rate,
                    const float min_token_rate,
+                   const float max_token_rate,
                    ExceptionHandler* exception_handler,
                    HttpResolver* http_resolver,
                    const std::string& memento_notify_url);

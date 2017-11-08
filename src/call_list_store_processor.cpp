@@ -143,7 +143,7 @@ void CallListStoreProcessor::Pool::process_work(
   if (clr->stop_watch.read(latency_us))
   {
     TRC_DEBUG("Request latency = %ldus", latency_us);
-    _load_monitor->request_complete(latency_us);
+    _load_monitor->request_complete(latency_us, clr->trail);
   }
 
   delete clr; clr = NULL;
@@ -277,13 +277,13 @@ CallListStoreProcessor::Pool::Pool(CallListStoreProcessor* call_list_store_proce
                                    const int max_call_list_length,
                                    const int call_list_ttl,
                                    unsigned int num_threads,
-                                   ExceptionHandler* exception_handler, 
+                                   ExceptionHandler* exception_handler,
                                    void (*callback)(CallListStoreProcessor::CallListRequest*),
                                    HttpNotifier* http_notifier,
                                    unsigned int max_queue) :
-  ThreadPool<CallListStoreProcessor::CallListRequest*>(num_threads, 
-                                                       exception_handler, 
-                                                       callback, 
+  ThreadPool<CallListStoreProcessor::CallListRequest*>(num_threads,
+                                                       exception_handler,
+                                                       callback,
                                                        max_queue),
   _call_list_store(call_list_store),
   _load_monitor(load_monitor),
