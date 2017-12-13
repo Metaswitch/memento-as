@@ -22,3 +22,9 @@
 [submodule "modules/gcovr"]
 	path = modules/gcovr
 	url = https://github.com/gcovr/gcovr.git
+[submodule "build-infra"]
+	path = build-infra
+	url = git@github.com:Metaswitch/clearwater-build-infra.git
+[submodule "modules/rapidjson"]
+	path = modules/rapidjson
+	url = https://github.com/Tencent/rapidjson.git
