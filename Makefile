@@ -1,13 +1,14 @@
 all: build
 
 ROOT := $(abspath $(shell pwd)/../..)
+
 MK_DIR := ${ROOT}/plugins/memento-as/mk
 PREFIX ?= ${ROOT}/usr
 INSTALL_DIR ?= ${PREFIX}
 MODULE_DIR := ${ROOT}/plugins/memento-as/modules
 
 DEB_COMPONENT := memento-as
-DEB_MAJOR_VERSION := 1.0${DEB_VERSION_QUALIFIER}
+DEB_MAJOR_VERSION ?= 1.0${DEB_VERSION_QUALIFIER}
 DEB_NAMES += memento-as memento-as-dbg
 
 INCLUDE_DIR := ${INSTALL_DIR}/include

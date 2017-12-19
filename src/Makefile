@@ -1,58 +1,65 @@
 ROOT := $(abspath $(shell pwd)/../../..)
 MODULE_DIR := ${ROOT}/modules
+BUILD_DIR := ${ROOT}/plugins/memento-as/build
 
 TARGETS := memento-as.so
 TEST_TARGETS := memento-as_test
 
-MEMENTO_AS_COMMON_SOURCES := mementoasplugin.cpp \
-                             call_list_store.cpp \
+MEMENTO_AS_COMMON_SOURCES := call_list_store.cpp \
                              call_list_store_processor.cpp \
                              mementoappserver.cpp \
                              mementosaslogger.cpp
 
-memento-as.so_SOURCES := ${MEMENTO_AS_COMMON_SOURCES}
+memento-as.so_SOURCES := ${MEMENTO_AS_COMMON_SOURCES} \
+                         mementoasplugin.cpp \
 
 memento-as_test_SOURCES := ${MEMENTO_AS_COMMON_SOURCES} \
-                           httpnotifier.cpp \
-                           httpconnection.cpp \
-                           httpclient.cpp \
-                           logger.cpp \
-                           saslogger.cpp \
                            accesslogger.cpp \
-                           log.cpp \
-                           sas.cpp \
-                           http_connection_pool.cpp \
-                           exception_handler.cpp \
-                           health_checker.cpp \
-                           counter.cpp \
                            accumulator.cpp \
-                           unique.cpp \
-                           utils.cpp \
-                           custom_headers.cpp \
-                           namespace_hop.cpp \
-                           sip_common.cpp \
-                           faketransport_tcp.cpp \
-                           pjutils.cpp \
-                           statistic.cpp \
-                           zmq_lvc.cpp \
                            acr.cpp \
-                           uri_classifier.cpp \
-                           stack.cpp \
-                           quiescing_manager.cpp \
-                           connection_tracker.cpp \
-                           baseresolver.cpp \
-                           dnscachedresolver.cpp \
-                           sipresolver.cpp \
-                           dnsparser.cpp \
+                           alarm.cpp \
+                           a_record_resolver.cpp \
                            base64.cpp \
-                           thread_dispatcher.cpp \
+                           base_communication_monitor.cpp \
+                           baseresolver.cpp \
                            cassandra_connection_pool.cpp \
                            cassandra_store.cpp \
-                           load_monitor.cpp \
+                           communicationmonitor.cpp \
+                           connection_tracker.cpp \
+                           counter.cpp \
+                           custom_headers.cpp \
+                           dnscachedresolver.cpp \
+                           dnsparser.cpp \
+                           exception_handler.cpp \
+                           faketransport_tcp.cpp \
+                           health_checker.cpp \
+                           httpclient.cpp \
+                           httpconnection.cpp \
+                           http_connection_pool.cpp \
+                           httpnotifier.cpp \
                            httpstack.cpp \
-                           test_main.cpp \
+                           load_monitor.cpp \
+                           log.cpp \
+                           logger.cpp \
+                           mementoappserver_test.cpp \
+                           namespace_hop.cpp \
+                           pjutils.cpp \
+                           pthread_cond_var_helper.cpp \
+                           quiescing_manager.cpp \
+                           sas.cpp \
+                           saslogger.cpp \
+                           sip_common.cpp \
+                           sipresolver.cpp \
+                           sproutletappserver.cpp \
+                           stack.cpp \
+                           statistic.cpp \
                            test_interposer.cpp \
-                           mementoappserver_test.cpp
+                           test_main.cpp \
+                           thread_dispatcher.cpp \
+                           unique.cpp \
+                           uri_classifier.cpp \
+                           utils.cpp \
+                           zmq_lvc.cpp
 
 COMMON_CPPFLAGS := -I${ROOT}/include \
                    -I${ROOT}/usr/include \
@@ -102,8 +109,8 @@ memento-as_test_LDFLAGS := ${COMMON_LDFLAGS} \
 
 include ${ROOT}/build-infra/cpp.mk
 
-#${memento-as_test_OBJECT_DIR}/test_interposer.so : ${ROOT}/modules/cpp-common/test_utils/test_interposer.cpp ${ROOT}/modules/cpp-common/test_utils/test_interposer.hpp
-#	$(CXX) $(memento-as_test_CPPFLAGS) -shared -fPIC -ldl $< -o $@
+${memento-as_test_OBJECT_DIR}/test_interposer.so : ${ROOT}/modules/cpp-common/test_utils/test_interposer.cpp ${ROOT}/modules/cpp-common/test_utils/test_interposer.hpp
+	$(CXX) $(memento-as_test_CPPFLAGS) -shared -fPIC -ldl $< -o $@
 
 include ${ROOT}/modules/cpp-common/makefiles/alarm-utils.mk
 

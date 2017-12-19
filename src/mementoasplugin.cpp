@@ -56,9 +56,112 @@ MementoPlugin::~MementoPlugin()
 bool MementoPlugin::load(struct options& opt, std::list<Sproutlet*>& sproutlets)
 {
   bool plugin_loaded = true;
+
+  std::string memento_prefix = "";
+  int memento_port = 0;
+  std::string memento_uri = "";
+
+  int memento_threads = 25;
+  std::string memento_notify_url = "";
+  int max_call_list_length = 0;
+  int call_list_ttl = 604800;
+
+  bool memento_enabled = true;
+  std::string plugin_name = "memento";
+
   std::string cassandra = "localhost";
 
-  if (false)
+  //TJW2 TODO: Remove auto
+  auto memento_it = opt.plugin_options.find(plugin_name);
+
+  if (memento_it == opt.plugin_options.end())
+  {
+    TRC_STATUS("Memento options not specified on Sprout command. Memento disabled.");
+    memento_enabled = false;
+  }
+  else
+  {
+    TRC_DEBUG("Got Memento options map");
+    std::multimap<std::string, std::string>& memento_opts = memento_it->second;
+
+    //TJW2 TODO: Remove auto
+    auto prefix_it = memento_opts.find("prefix");
+
+    if (prefix_it != memento_opts.end())
+    {
+      memento_prefix = prefix_it->second;
+      TRC_DEBUG("Overriding prefix parameter: %s", memento_prefix.c_str());
+    }
+
+    //TJW2 TODO: Remove auto
+    auto port_it = memento_opts.find("port");
+
+    if (port_it != memento_opts.end())
+    {
+      memento_port = std::stoi(port_it->second);
+      TRC_DEBUG("Set port parameter: %d", memento_port);
+      if (memento_port == 0 )
+      {
+        TRC_STATUS("Memento port set to zero. Memento disabled.");
+      }
+      memento_enabled = (memento_port > 0);
+    }
+    else
+    {
+      TRC_STATUS("Memento port not set. Memento disabled.");
+      memento_enabled = false;
+    }
+
+    //TJW2 TODO: Remove auto
+    auto uri_it = memento_opts.find("uri");
+
+    if (uri_it != memento_opts.end())
+    {
+      memento_uri = uri_it->second;
+      TRC_DEBUG("Overriding uri parameter: %s", memento_uri.c_str());
+    }
+
+    //TJW2 TODO: Remove auto
+    auto threads_it = memento_opts.find("threads");
+
+    if (threads_it != memento_opts.end())
+    {
+      memento_threads = std::stoi(threads_it->second);
+      TRC_DEBUG("Set threads parameter: %d", memento_threads);
+    }
+    else
+    {
+      TRC_STATUS("Memento thread parameter not set. Memento disabled.");
+      memento_enabled = false;
+    }
+
+    //TJW2 TODO: Remove auto
+    auto url_it = memento_opts.find("notify_url");
+
+    if (url_it != memento_opts.end())
+    {
+      memento_notify_url = std::stoi(url_it->second);
+      TRC_DEBUG("Set notify_url: %s", memento_notify_url.c_str());
+    }
+    else
+    {
+      TRC_STATUS("Memento notify_url not set. Memento disabled.");
+      memento_enabled = false;
+    }
+
+    // If the memento cassandra hostname option is set, use that instead of "localhost".
+    //TJW2 TODO: Remove auto
+    auto cassandra_it = memento_opts.find("cassandra");
+
+    if (cassandra_it != memento_opts.end())
+    {
+      cassandra = cassandra_it->second;
+      TRC_DEBUG("Set cassandra hostname: %s", cassandra.c_str());
+    }
+
+  }
+
+  if (memento_enabled)
   {
     TRC_STATUS("Memento plugin enabled");
 
@@ -66,8 +169,8 @@ bool MementoPlugin::load(struct options& opt, std::list<Sproutlet*>& sproutlets)
                                                                                                                                "1.2.826.0.1.1578918.9.8.1.4");
     SNMP::SuccessFailCountByRequestTypeTable* outgoing_sip_transactions_tbl = SNMP::SuccessFailCountByRequestTypeTable::create("memento_as_outgoing_sip_transactions",
                                                                                                                                "1.2.826.0.1.1578918.9.8.1.5");
-    if (((opt.max_call_list_length == 0) &&
-         (opt.call_list_ttl == 0)))
+    if (((max_call_list_length == 0) &&
+         (call_list_ttl == 0)))
     {
       TRC_ERROR("Can't have an unlimited maximum call length and a unlimited TTL for the call list store - disabling Memento");
     }
@@ -96,21 +199,15 @@ bool MementoPlugin::load(struct options& opt, std::list<Sproutlet*>& sproutlets)
                                              30,
                                              9160);
 
-      // If the memento cassandra hostname option is set, use that instead of "localhost".
-      if (opt.plugin_options["memento"].count("cassandra"))
-      {
-        cassandra = opt.plugin_options.find("memento")->second.find("cassandra")->second;
-      }
-
       _call_list_store = new CallListStore::Store();
       _call_list_store->configure_connection(cassandra, 9160, _cass_comm_monitor, _cass_resolver);
 
-      _memento = new MementoAppServer(opt.prefix_memento,
+      _memento = new MementoAppServer(memento_prefix,
                                       _call_list_store,
                                       opt.home_domain,
-                                      opt.max_call_list_length,
-                                      opt.memento_threads,
-                                      opt.call_list_ttl,
+                                      max_call_list_length,
+                                      memento_threads,
+                                      call_list_ttl,
                                       stack_data.stats_aggregator,
                                       opt.cass_target_latency_us,
                                       opt.max_tokens,
@@ -119,11 +216,11 @@ bool MementoPlugin::load(struct options& opt, std::list<Sproutlet*>& sproutlets)
                                       opt.max_token_rate,
                                       exception_handler,
                                       http_resolver,
-                                      opt.memento_notify_url);
+                                      memento_notify_url);
 
       _memento_sproutlet = new SproutletAppServerShim(_memento,
-                                                      opt.port_memento,
-                                                      opt.uri_memento,
+                                                      memento_port,
+                                                      memento_uri,
                                                       incoming_sip_transactions_tbl,
                                                       outgoing_sip_transactions_tbl);
       sproutlets.push_back(_memento_sproutlet);
