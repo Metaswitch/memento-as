@@ -9,7 +9,7 @@
  * Metaswitch Networks in a separate written agreement.
  */
 
-//#include "cfgoptions.h"
+#include "cfgoptions.h"
 #include "sproutletplugin.h"
 #include "mementoappserver.h"
 #include "call_list_store.h"
@@ -60,7 +60,6 @@ bool MementoPlugin::load(struct options& opt, std::list<Sproutlet*>& sproutlets)
 
   if (false)
   {
-    /*
     TRC_STATUS("Memento plugin enabled");
 
     SNMP::SuccessFailCountByRequestTypeTable* incoming_sip_transactions_tbl = SNMP::SuccessFailCountByRequestTypeTable::create("memento_as_incoming_sip_transactions",
@@ -128,7 +127,7 @@ bool MementoPlugin::load(struct options& opt, std::list<Sproutlet*>& sproutlets)
                                                       incoming_sip_transactions_tbl,
                                                       outgoing_sip_transactions_tbl);
       sproutlets.push_back(_memento_sproutlet);
-    }*/
+    }
   }
 
   return plugin_loaded;
