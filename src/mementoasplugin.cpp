@@ -17,6 +17,68 @@
 #include "memento_as_alarmdefinition.h"
 #include "log.h"
 
+void set_memento_opt_str(std::multimap<std::string, std::string>& memento_opts,
+                         std::string opt_name,
+                         bool required_opt,
+                         std::string& opt,
+                         bool& memento_enabled)
+{
+  //TJW2 TODO: Remove auto
+  auto opt_it = memento_opts.find(opt_name);
+
+  if (opt_it != memento_opts.end())
+  {
+    opt = opt_it->second;
+    TRC_DEBUG("%s memento-as option '%s': '%s'",
+              required_opt ? "Set" : "Overwrote",
+              opt_name.c_str(),
+              opt.c_str());
+  }
+  else if (required_opt)
+  {
+    TRC_STATUS("Required memento-as option '%s' not set. Disabling memento-as.",
+              opt_name.c_str());
+    memento_enabled = false;
+  }
+  else
+  {
+    TRC_DEBUG("memento-as option '%s' not set. Defaulting to: '%s'",
+              opt_name.c_str(),
+              opt.c_str());
+  }
+}
+
+void set_memento_int_str(std::multimap<std::string, std::string>& memento_opts,
+                         std::string opt_name,
+                         bool required_opt,
+                         int& opt,
+                         bool& memento_enabled)
+{
+  //TJW2 TODO: Remove auto
+  auto opt_it = memento_opts.find(opt_name);
+
+  if (opt_it != memento_opts.end())
+  {
+    opt = std::stoi(opt_it->second);
+    TRC_DEBUG("%s memento-as option '%s': %d",
+              required_opt ? "Set" : "Overwrote",
+              opt_name.c_str(),
+              opt);
+  }
+  else if (required_opt)
+  {
+    TRC_STATUS("Required memento-as option '%s' not set. Disabling memento-as.",
+              opt_name.c_str());
+    memento_enabled = false;
+  }
+  else
+  {
+    TRC_DEBUG("memento-as option '%s' not set. Defaulting to: %d",
+              opt_name.c_str(),
+              opt);
+  }
+}
+
 class MementoPlugin : public SproutletPlugin
 {
 public:
@@ -67,7 +129,7 @@ bool MementoPlugin::load(struct options& opt, std::list<Sproutlet*>& sproutlets)
   int call_list_ttl = 604800;
 
   bool memento_enabled = true;
-  std::string plugin_name = "memento";
+  std::string plugin_name = "memento-as";
 
   std::string cassandra = "localhost";
 
@@ -84,81 +146,54 @@ bool MementoPlugin::load(struct options& opt, std::list<Sproutlet*>& sproutlets)
     TRC_DEBUG("Got Memento options map");
     std::multimap<std::string, std::string>& memento_opts = memento_it->second;
 
-    //TJW2 TODO: Remove auto
-    auto prefix_it = memento_opts.find("prefix");
+    set_memento_opt_str(memento_opts,
+                        "memento_prefix",
+                        false,
+                        memento_prefix,
+                        memento_enabled);
 
-    if (prefix_it != memento_opts.end())
-    {
-      memento_prefix = prefix_it->second;
-      TRC_DEBUG("Overriding prefix parameter: %s", memento_prefix.c_str());
-    }
+    set_memento_opt_str(memento_opts,
+                        "memento_uri",
+                        false,
+                        memento_uri,
+                        memento_enabled);
 
-    //TJW2 TODO: Remove auto
-    auto port_it = memento_opts.find("port");
+    set_memento_int_str(memento_opts,
+                        "memento_threads",
+                        true,
+                        memento_threads,
+                        memento_enabled);
 
-    if (port_it != memento_opts.end())
+    set_memento_opt_str(memento_opts,
+                        "memento_notify_url",
+                        false,
+                        memento_notify_url,
+                        memento_enabled);
+
+    set_memento_opt_str(memento_opts,
+                        "cassandra",
+                        false,
+                        cassandra,
+                        memento_enabled);
+
+    set_memento_int_str(memento_opts,
+                        "call_list_ttl",
+                        false,
+                        call_list_ttl,
+                        memento_enabled);
+
+    set_memento_int_str(memento_opts,
+                        "max_call_list_length",
+                        false,
+                        max_call_list_length,
+                        memento_enabled);
+
+    if (((max_call_list_length == 0) &&
+         (call_list_ttl == 0)))
     {
-      memento_port = std::stoi(port_it->second);
-      TRC_DEBUG("Set port parameter: %d", memento_port);
-      if (memento_port == 0 )
-      {
-        TRC_STATUS("Memento port set to zero. Memento disabled.");
-      }
-      memento_enabled = (memento_port > 0);
-    }
-    else
-    {
-      TRC_STATUS("Memento port not set. Memento disabled.");
+      TRC_ERROR("Can't have an unlimited maximum call length and a unlimited TTL for the call list store - disabling Memento");
       memento_enabled = false;
     }
-
-    //TJW2 TODO: Remove auto
-    auto uri_it = memento_opts.find("uri");
-
-    if (uri_it != memento_opts.end())
-    {
-      memento_uri = uri_it->second;
-      TRC_DEBUG("Overriding uri parameter: %s", memento_uri.c_str());
-    }
-
-    //TJW2 TODO: Remove auto
-    auto threads_it = memento_opts.find("threads");
-
-    if (threads_it != memento_opts.end())
-    {
-      memento_threads = std::stoi(threads_it->second);
-      TRC_DEBUG("Set threads parameter: %d", memento_threads);
-    }
-    else
-    {
-      TRC_STATUS("Memento thread parameter not set. Memento disabled.");
-      memento_enabled = false;
-    }
-
-    //TJW2 TODO: Remove auto
-    auto url_it = memento_opts.find("notify_url");
-
-    if (url_it != memento_opts.end())
-    {
-      memento_notify_url = std::stoi(url_it->second);
-      TRC_DEBUG("Set notify_url: %s", memento_notify_url.c_str());
-    }
-    else
-    {
-      TRC_STATUS("Memento notify_url not set. Memento disabled.");
-      memento_enabled = false;
-    }
-
-    // If the memento cassandra hostname option is set, use that instead of "localhost".
-    //TJW2 TODO: Remove auto
-    auto cassandra_it = memento_opts.find("cassandra");
-
-    if (cassandra_it != memento_opts.end())
-    {
-      cassandra = cassandra_it->second;
-      TRC_DEBUG("Set cassandra hostname: %s", cassandra.c_str());
-    }
-
   }
 
   if (memento_enabled)
@@ -169,62 +204,58 @@ bool MementoPlugin::load(struct options& opt, std::list<Sproutlet*>& sproutlets)
                                                                                                                                "1.2.826.0.1.1578918.9.8.1.4");
     SNMP::SuccessFailCountByRequestTypeTable* outgoing_sip_transactions_tbl = SNMP::SuccessFailCountByRequestTypeTable::create("memento_as_outgoing_sip_transactions",
                                                                                                                                "1.2.826.0.1.1578918.9.8.1.5");
-    if (((max_call_list_length == 0) &&
-         (call_list_ttl == 0)))
+    _cass_comm_monitor = new CommunicationMonitor(new Alarm(alarm_manager,
+                                                            "memento",
+                                                            AlarmDef::MEMENTO_AS_CASSANDRA_COMM_ERROR,
+                                                            AlarmDef::CRITICAL),
+                                                  "Memento",
+                                                  "Memcached");
+
+    // We need the address family for the CassandraResolver
+    int af = AF_INET;
+    struct in6_addr dummy_addr;
+    if (inet_pton(AF_INET6, opt.local_host.c_str(), &dummy_addr) == 1)
     {
-      TRC_ERROR("Can't have an unlimited maximum call length and a unlimited TTL for the call list store - disabling Memento");
+      TRC_DEBUG("Local host is an IPv6 address");
+      af = AF_INET6;
     }
-    else
-    {
-      _cass_comm_monitor = new CommunicationMonitor(new Alarm(alarm_manager,
-                                                              "memento",
-                                                              AlarmDef::MEMENTO_AS_CASSANDRA_COMM_ERROR,
-                                                              AlarmDef::CRITICAL),
-                                                    "Memento",
-                                                    "Memcached");
 
-      // We need the address family for the CassandraResolver
-      int af = AF_INET;
-      struct in6_addr dummy_addr;
-      if (inet_pton(AF_INET6, opt.local_host.c_str(), &dummy_addr) == 1)
-      {
-        TRC_DEBUG("Local host is an IPv6 address");
-        af = AF_INET6;
-      }
+    // Default to a 30s blacklist/graylist duration and port 9160
+    _cass_resolver = new CassandraResolver(dns_resolver,
+                                           af,
+                                           30,
+                                           30,
+                                           9160);
 
-      // Default to a 30s blacklist/graylist duration and port 9160
-      _cass_resolver = new CassandraResolver(dns_resolver,
-                                             af,
-                                             30,
-                                             30,
-                                             9160);
+    _call_list_store = new CallListStore::Store();
+    _call_list_store->configure_connection(cassandra, 9160, _cass_comm_monitor, _cass_resolver);
 
-      _call_list_store = new CallListStore::Store();
-      _call_list_store->configure_connection(cassandra, 9160, _cass_comm_monitor, _cass_resolver);
+    _memento = new MementoAppServer(memento_prefix,
+                                    _call_list_store,
+                                    opt.home_domain,
+                                    max_call_list_length,
+                                    memento_threads,
+                                    call_list_ttl,
+                                    stack_data.stats_aggregator,
+                                    opt.cass_target_latency_us,
+                                    opt.max_tokens,
+                                    opt.init_token_rate,
+                                    opt.min_token_rate,
+                                    opt.max_token_rate,
+                                    exception_handler,
+                                    http_resolver,
+                                    memento_notify_url);
 
-      _memento = new MementoAppServer(memento_prefix,
-                                      _call_list_store,
-                                      opt.home_domain,
-                                      max_call_list_length,
-                                      memento_threads,
-                                      call_list_ttl,
-                                      stack_data.stats_aggregator,
-                                      opt.cass_target_latency_us,
-                                      opt.max_tokens,
-                                      opt.init_token_rate,
-                                      opt.min_token_rate,
-                                      opt.max_token_rate,
-                                      exception_handler,
-                                      http_resolver,
-                                      memento_notify_url);
-
-      _memento_sproutlet = new SproutletAppServerShim(_memento,
-                                                      memento_port,
-                                                      memento_uri,
-                                                      incoming_sip_transactions_tbl,
-                                                      outgoing_sip_transactions_tbl);
-      sproutlets.push_back(_memento_sproutlet);
-    }
+    _memento_sproutlet = new SproutletAppServerShim(_memento,
+                                                    memento_port,
+                                                    memento_uri,
+                                                    incoming_sip_transactions_tbl,
+                                                    outgoing_sip_transactions_tbl);
+    sproutlets.push_back(_memento_sproutlet);
+  }
+  else
+  {
+    TRC_STATUS("Memento plugin disabled");
   }
 
   return plugin_loaded;

@@ -1,0 +1,45 @@
+#!/bin/sh
+
+# @file memento-as.plugin_conf
+#
+# Copyright (C) 2017  Metaswitch Networks Ltd
+#
+# This script generates the Memento-specific command-line arguments that must
+# be passed to sprout.  This is invoked from the sprout init.d script, and
+# outputs a simple string list of parameters to pass to sprout on startup.
+#
+# All parameters are of the form:
+#   --plugin-option <sproutlet name>,<arg name>,<value>
+#
+
+# Read in deployment configuration.
+. /etc/clearwater/config
+
+MEMENTO_AS_ARGS=""
+
+# Add parameters if they are configured in the deployment config.
+[ "$memento_prefix" = "" ] \
+  || MEMENTO_AS_ARGS="$MEMENTO_AS_ARGS --plugin-option memento-as,memento_prefix,$memento_prefix"
+
+[ "$memento_uri" = "" ] \
+  || MEMENTO_AS_ARGS="$MEMENTO_AS_ARGS --plugin-option memento-as,memento_uri,$memento_uri"
+
+[ "$memento_threads" = "" ] \
+  || MEMENTO_AS_ARGS="$MEMENTO_AS_ARGS --plugin-option memento-as,memento_threads,$memento_threads"
+
+[ "$memento_notify_url" = "" ] \
+  || MEMENTO_AS_ARGS="$MEMENTO_AS_ARGS --plugin-option memento-as,memento_notify_url,$memento_notify_url"
+
+[ "$cassandra_hostname" = "" ] \
+  || MEMENTO_AS_ARGS="$MEMENTO_AS_ARGS --plugin-option memento-as,cassandra,$cassandra_hostname"
+
+[ "$call_list_ttl" = "" ] \
+  || MEMENTO_AS_ARGS="$MEMENTO_AS_ARGS --plugin-option memento-as,call_list_ttl,$call_list_ttl"
+
+[ "$max_call_list_length" = "" ] \
+  || MEMENTO_AS_ARGS="$MEMENTO_AS_ARGS --plugin-option memento-as,max_call_list_length,$max_call_list_length"
+
+# Finally, echo the collected arguments to stdout.  The sprout startup script
+# that invoked this script will append these arguments to those passed to
+# the sprout process.
+echo $MEMENTO_AS_ARGS
