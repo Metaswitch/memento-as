@@ -18,6 +18,9 @@
 MEMENTO_AS_ARGS=""
 
 # Add parameters if they are configured in the deployment config.
+[ "$memento" = "" ] \
+  || MEMENTO_AS_ARGS="$MEMENTO_AS_ARGS --plugin-option memento-as,memento,$memento"
+
 [ "$memento_prefix" = "" ] \
   || MEMENTO_AS_ARGS="$MEMENTO_AS_ARGS --plugin-option memento-as,memento_prefix,$memento_prefix"
 

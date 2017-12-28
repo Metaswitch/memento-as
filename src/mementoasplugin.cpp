@@ -23,8 +23,8 @@ void set_memento_opt_str(std::multimap<std::string, std::string>& memento_opts,
                          std::string& opt,
                          bool& memento_enabled)
 {
-  //TJW2 TODO: Remove auto
-  auto opt_it = memento_opts.find(opt_name);
+  std::multimap<std::string, std::string>::iterator
+    opt_it = memento_opts.find(opt_name);
 
   if (opt_it != memento_opts.end())
   {
@@ -48,18 +48,36 @@ void set_memento_opt_str(std::multimap<std::string, std::string>& memento_opts,
   }
 }
 
-void set_memento_int_str(std::multimap<std::string, std::string>& memento_opts,
+void set_memento_opt_int(std::multimap<std::string, std::string>& memento_opts,
                          std::string opt_name,
                          bool required_opt,
                          int& opt,
                          bool& memento_enabled)
 {
-  //TJW2 TODO: Remove auto
-  auto opt_it = memento_opts.find(opt_name);
+  std::multimap<std::string, std::string>::iterator
+    opt_it = memento_opts.find(opt_name);
+
+  bool option_read_success = false;
+  int as_int = -1;
 
   if (opt_it != memento_opts.end())
   {
-    opt = std::stoi(opt_it->second);
+    as_int = atoi(opt_it->second.c_str());
+    if (opt_it->second.c_str() == std::to_string(as_int))
+    {
+      option_read_success = true;
+    }
+    else
+    {
+      TRC_WARNING("Failed to parse value for memento-as option %s",
+                  opt_name.c_str());
+      option_read_success = false;
+    }
+  }
+
+  if (option_read_success)
+  {
+    opt = as_int;
     TRC_DEBUG("%s memento-as option '%s': %d",
               required_opt ? "Set" : "Overwrote",
               opt_name.c_str(),
@@ -119,7 +137,7 @@ bool MementoPlugin::load(struct options& opt, std::list<Sproutlet*>& sproutlets)
 {
   bool plugin_loaded = true;
 
-  std::string memento_prefix = "";
+  std::string memento_prefix = "memento";
   int memento_port = 0;
   std::string memento_uri = "";
 
@@ -133,8 +151,8 @@ bool MementoPlugin::load(struct options& opt, std::list<Sproutlet*>& sproutlets)
 
   std::string cassandra = "localhost";
 
-  //TJW2 TODO: Remove auto
-  auto memento_it = opt.plugin_options.find(plugin_name);
+  std::map<std::string, std::multimap<std::string, std::string>>::iterator
+    memento_it = opt.plugin_options.find(plugin_name);
 
   if (memento_it == opt.plugin_options.end())
   {
@@ -146,11 +164,20 @@ bool MementoPlugin::load(struct options& opt, std::list<Sproutlet*>& sproutlets)
     TRC_DEBUG("Got Memento options map");
     std::multimap<std::string, std::string>& memento_opts = memento_it->second;
 
+    set_memento_opt_int(memento_opts,
+                        "memento",
+                        true,
+                        memento_port,
+                        memento_enabled);
+
     set_memento_opt_str(memento_opts,
                         "memento_prefix",
                         false,
                         memento_prefix,
                         memento_enabled);
+
+    // Given the prefix, set the default uri
+    memento_uri = "sip:" + memento_prefix + "." + opt.sprout_hostname + ";transport=TCP";
 
     set_memento_opt_str(memento_opts,
                         "memento_uri",
@@ -158,9 +185,9 @@ bool MementoPlugin::load(struct options& opt, std::list<Sproutlet*>& sproutlets)
                         memento_uri,
                         memento_enabled);
 
-    set_memento_int_str(memento_opts,
+    set_memento_opt_int(memento_opts,
                         "memento_threads",
-                        true,
+                        false,
                         memento_threads,
                         memento_enabled);
 
@@ -176,13 +203,13 @@ bool MementoPlugin::load(struct options& opt, std::list<Sproutlet*>& sproutlets)
                         cassandra,
                         memento_enabled);
 
-    set_memento_int_str(memento_opts,
+    set_memento_opt_int(memento_opts,
                         "call_list_ttl",
                         false,
                         call_list_ttl,
                         memento_enabled);
 
-    set_memento_int_str(memento_opts,
+    set_memento_opt_int(memento_opts,
                         "max_call_list_length",
                         false,
                         max_call_list_length,
