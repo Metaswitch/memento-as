@@ -1,3 +1,7 @@
-call_list_store_processor.cpp
-httpnotifier.cpp
-mementoasplugin.cpp
+include/call_list_store_processor.h
+src/call_list_store_processor.cpp
+src/httpnotifier.cpp
+src/mementoasplugin.cpp
+modules/memento-common/include/call_list_store.h
+modules/memento-common/src/call_list_store.cpp
+modules/memento-common/src/mementosaslogger.cpp

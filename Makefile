@@ -145,7 +145,6 @@ build: ${SUBMODULES} memento-as
 
 test: ${SUBMODULES} memento-as_test
 
-full_test: ${SUBMODULES} memento-as_full_test
 clean: $(patsubst %, %_clean, ${SUBMODULES}) memento-as_clean
 	rm -rf ${ROOT}/plugins/memento-as/build
 
