@@ -23,16 +23,22 @@ void set_memento_opt_str(std::multimap<std::string, std::string>& memento_opts,
                          std::string& opt,
                          bool& memento_enabled)
 {
+  if (!memento_enabled)
+  {
+    // If memento is already disabled, don't attempt to parse another option
+    return;
+  }
+
   std::multimap<std::string, std::string>::iterator
     opt_it = memento_opts.find(opt_name);
 
   if (opt_it != memento_opts.end())
   {
     opt = opt_it->second;
-    TRC_DEBUG("%s memento-as option '%s': '%s'",
-              required_opt ? "Set" : "Overwrote",
-              opt_name.c_str(),
-              opt.c_str());
+    TRC_INFO("%s memento-as option '%s': '%s'",
+             required_opt ? "Set" : "Overwrote",
+             opt_name.c_str(),
+             opt.c_str());
   }
   else if (required_opt)
   {
@@ -42,9 +48,9 @@ void set_memento_opt_str(std::multimap<std::string, std::string>& memento_opts,
   }
   else
   {
-    TRC_DEBUG("memento-as option '%s' not set. Defaulting to: '%s'",
-              opt_name.c_str(),
-              opt.c_str());
+    TRC_INFO("memento-as option '%s' not set. Defaulting to: '%s'",
+             opt_name.c_str(),
+             opt.c_str());
   }
 }
 
@@ -54,6 +60,12 @@ void set_memento_opt_int(std::multimap<std::string, std::string>& memento_opts,
                          int& opt,
                          bool& memento_enabled)
 {
+  if (!memento_enabled)
+  {
+    // If memento is already disabled, don't attempt to parse another option
+    return;
+  }
+
   std::multimap<std::string, std::string>::iterator
     opt_it = memento_opts.find(opt_name);
 
@@ -78,10 +90,10 @@ void set_memento_opt_int(std::multimap<std::string, std::string>& memento_opts,
   if (option_read_success)
   {
     opt = as_int;
-    TRC_DEBUG("%s memento-as option '%s': %d",
-              required_opt ? "Set" : "Overwrote",
-              opt_name.c_str(),
-              opt);
+    TRC_INFO("%s memento-as option '%s': %d",
+             required_opt ? "Set" : "Overwrote",
+             opt_name.c_str(),
+             opt);
   }
   else if (required_opt)
   {
@@ -91,9 +103,9 @@ void set_memento_opt_int(std::multimap<std::string, std::string>& memento_opts,
   }
   else
   {
-    TRC_DEBUG("memento-as option '%s' not set. Defaulting to: %d",
-              opt_name.c_str(),
-              opt);
+    TRC_INFO("memento-as option '%s' not set. Defaulting to: %d",
+             opt_name.c_str(),
+             opt);
   }
 }
 
@@ -150,6 +162,7 @@ bool MementoPlugin::load(struct options& opt, std::list<Sproutlet*>& sproutlets)
   std::string plugin_name = "memento-as";
 
   std::string cassandra = "localhost";
+  int cass_target_latency_us = 1000000;
 
   std::map<std::string, std::multimap<std::string, std::string>>::iterator
     memento_it = opt.plugin_options.find(plugin_name);
@@ -169,6 +182,13 @@ bool MementoPlugin::load(struct options& opt, std::list<Sproutlet*>& sproutlets)
                         true,
                         memento_port,
                         memento_enabled);
+
+    if (memento_port < 0)
+    {
+      TRC_STATUS("Memento port set to a value of less than zero (%d). Disabling memento.",
+                 memento_port);
+        memento_enabled = false;
+    }
 
     set_memento_opt_str(memento_opts,
                         "memento_prefix",
@@ -213,6 +233,12 @@ bool MementoPlugin::load(struct options& opt, std::list<Sproutlet*>& sproutlets)
                         "max_call_list_length",
                         false,
                         max_call_list_length,
+                        memento_enabled);
+
+    set_memento_opt_int(memento_opts,
+                        "cass_target_latency_us",
+                        false,
+                        cass_target_latency_us,
                         memento_enabled);
 
     if (((max_call_list_length == 0) &&
@@ -264,7 +290,7 @@ bool MementoPlugin::load(struct options& opt, std::list<Sproutlet*>& sproutlets)
                                     memento_threads,
                                     call_list_ttl,
                                     stack_data.stats_aggregator,
-                                    opt.cass_target_latency_us,
+                                    cass_target_latency_us,
                                     opt.max_tokens,
                                     opt.init_token_rate,
                                     opt.min_token_rate,

@@ -42,6 +42,9 @@ MEMENTO_AS_ARGS=""
 [ "$max_call_list_length" = "" ] \
   || MEMENTO_AS_ARGS="$MEMENTO_AS_ARGS --plugin-option memento-as,max_call_list_length,$max_call_list_length"
 
+[ "$cass_target_latency_us" = "" ] \
+  || MEMENTO_AS_ARGS="$MEMENTO_AS_ARGS --plugin-option memento-as,cass_target_latency_us,$cass_target_latency_us"
+
 # Finally, echo the collected arguments to stdout.  The sprout startup script
 # that invoked this script will append these arguments to those passed to
 # the sprout process.
