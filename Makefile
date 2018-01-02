@@ -42,28 +42,34 @@ memento-as_test_SOURCES := ${MEMENTO_AS_COMMON_SOURCES} \
                            base64.cpp \
                            base_communication_monitor.cpp \
                            baseresolver.cpp \
+                           call_list_store_test.cpp \
+                           call_list_store_processor_test.cpp \
                            communicationmonitor.cpp \
                            connection_tracker.cpp \
                            counter.cpp \
                            custom_headers.cpp \
+                           curl_interposer.cpp \
                            dnscachedresolver.cpp \
                            dnsparser.cpp \
                            exception_handler.cpp \
+                           fakecurl.cpp \
                            faketransport_tcp.cpp \
                            health_checker.cpp \
                            httpclient.cpp \
                            httpconnection.cpp \
                            http_connection_pool.cpp \
+                           httpnotifier_test.cpp \
                            httpstack.cpp \
                            load_monitor.cpp \
                            log.cpp \
                            logger.cpp \
+                           mockhttpnotifier.cpp \
+                           mock_sas.cpp \
                            mementoappserver_test.cpp \
                            namespace_hop.cpp \
                            pjutils.cpp \
                            pthread_cond_var_helper.cpp \
                            quiescing_manager.cpp \
-                           sas.cpp \
                            saslogger.cpp \
                            sip_common.cpp \
                            sipresolver.cpp \
@@ -120,12 +126,16 @@ memento-as_test_LDFLAGS := ${COMMON_LDFLAGS} \
                            -lz \
                            $(shell PKG_CONFIG_PATH=${ROOT}/usr/lib/pkgconfig pkg-config --libs libpjproject)
 
-VPATH = ${ROOT}/src:${ROOT}/modules/cpp-common/src:${ROOT}/plugins/memento-as/src:${ROOT}/plugins/memento-as/ut:${ROOT}/modules/cpp-common/test_utils:${ROOT}/src/ut:${ROOT}/plugins/memento-as/modules/memento-common/src:${ROOT}/modules/sas-client/source
+VPATH = ${ROOT}/src:${ROOT}/modules/cpp-common/src:${ROOT}/plugins/memento-as/src:${ROOT}/plugins/memento-as/ut:${ROOT}/modules/cpp-common/test_utils:${ROOT}/src/ut:${ROOT}/plugins/memento-as/modules/memento-common/src:${ROOT}/modules/sas-client/source:${ROOT}/plugins/memento-as/modules/memento-common/ut
 
 include ${ROOT}/build-infra/cpp.mk
 
 ${memento-as_test_OBJECT_DIR}/test_interposer.so : ${ROOT}/modules/cpp-common/test_utils/test_interposer.cpp ${ROOT}/modules/cpp-common/test_utils/test_interposer.hpp
 	$(CXX) $(memento-as_test_CPPFLAGS) -shared -fPIC -ldl $< -o $@
+
+${memento-as_test_OBJECT_DIR}/curl_interposer.so : ${ROOT}/modules/cpp-common/test_utils/curl_interposer.cpp ${ROOT}/modules/cpp-common/test_utils/curl_interposer.hpp ${ROOT}/modules/cpp-common/test_utils/fakecurl.cpp ${ROOT}/modules/cpp-common/test_utils/fakecurl.hpp
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(memento-as_test_CPPFLAGS) -shared -fPIC -ldl $< -o $@
+CLEANS += ${memento_test_OBJECT_DIR}/curl_interposer.so
 
 include ${ROOT}/modules/cpp-common/makefiles/alarm-utils.mk
 

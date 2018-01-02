@@ -2,7 +2,7 @@
 
 # @file memento-as.plugin_conf
 #
-# Copyright (C) 2017  Metaswitch Networks Ltd
+# Copyright (C) 2018  Metaswitch Networks Ltd
 #
 # This script generates the Memento-specific command-line arguments that must
 # be passed to sprout.  This is invoked from the sprout init.d script, and

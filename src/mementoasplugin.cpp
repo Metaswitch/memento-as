@@ -1,7 +1,7 @@
 /**
  * @file mementoasplugin.cpp  Plug-in wrapper for the Memento Sproutlet.
  *
- * Copyright (C) Metaswitch Networks 2016
+ * Copyright (C) Metaswitch Networks 2018
  * If license terms are provided to you in a COPYING file in the root directory
  * of the source code repository by which you are accessing this code, then
  * the license outlined in that COPYING file applies to your use.
@@ -43,7 +43,7 @@ void set_memento_opt_str(std::multimap<std::string, std::string>& memento_opts,
   else if (required_opt)
   {
     TRC_STATUS("Required memento-as option '%s' not set. Disabling memento-as.",
-              opt_name.c_str());
+               opt_name.c_str());
     memento_enabled = false;
   }
   else
@@ -98,7 +98,7 @@ void set_memento_opt_int(std::multimap<std::string, std::string>& memento_opts,
   else if (required_opt)
   {
     TRC_STATUS("Required memento-as option '%s' not set. Disabling memento-as.",
-              opt_name.c_str());
+               opt_name.c_str());
     memento_enabled = false;
   }
   else
@@ -262,7 +262,7 @@ bool MementoPlugin::load(struct options& opt, std::list<Sproutlet*>& sproutlets)
                                                             AlarmDef::MEMENTO_AS_CASSANDRA_COMM_ERROR,
                                                             AlarmDef::CRITICAL),
                                                   "Memento",
-                                                  "Memcached");
+                                                  "Cassandra");
 
     // We need the address family for the CassandraResolver
     int af = AF_INET;
