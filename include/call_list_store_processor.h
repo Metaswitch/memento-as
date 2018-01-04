@@ -65,11 +65,13 @@ public:
     SAS::TrailId trail;
   };
 
+  // LCOV_EXCL_START
   static void exception_callback(CallListStoreProcessor::CallListRequest* work)
   {
     // No recovery behaviour as this is asynchronos, so we can't sensibly
     // respond
   }
+  // LCOV_EXCL_STOP
 
 private:
   /// @class Pool

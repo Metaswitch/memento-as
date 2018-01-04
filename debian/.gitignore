@@ -1,0 +1,7 @@
+debhelper
+*debhelper.log
+*substvars
+changelog
+files
+/memento-as/
+/memento-as-dbg/
