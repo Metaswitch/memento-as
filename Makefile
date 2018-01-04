@@ -1,3 +1,5 @@
+all: build
+
 TARGETS := memento-as.so
 
 TEST_TARGETS := memento-as_test
@@ -145,17 +147,17 @@ ${ROOT}/usr/include/memento_as_alarmdefinition.h : ${ROOT}/build/bin/alarm_heade
 
 CLEANS += ${ROOT}/usr/include/memento_as_alarmdefinition.h
 
-ALARM_DEFINITION_FILES := ${ROOT}/build/memento-as.so/mementoasplugin.o \
-                          ${ROOT}/build/memento-as_test/mementoasplugin.o
+ALARM_DEFINITION_FILES := ${BUILD_DIR}/memento-as.so/mementoasplugin.o \
+                          ${BUILD_DIR}/memento-as_test/mementoasplugin.o
 
 # Ensure that we generate the alarm definition file before building any of the code that includes it
 ${ALARM_DEFINITION_FILES} : ${ROOT}/usr/include/memento_as_alarmdefinition.h
 
-build: ${SUBMODULES} memento-as
+build: ${SUBMODULES} memento-as.so
 
 test: ${SUBMODULES} memento-as_test
 
-clean: $(patsubst %, %_clean, ${SUBMODULES}) memento-as_clean
+clean: $(patsubst %, %_clean, ${SUBMODULES})
 	rm -rf ${ROOT}/plugins/memento-as/build
 
 include ${ROOT}/build-infra/cw-deb.mk
