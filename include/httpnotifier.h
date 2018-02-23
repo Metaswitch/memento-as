@@ -36,6 +36,9 @@ private:
   /// Resolver
   HttpResolver *_http_resolver;
 
+  /// Client
+  HttpClient *_http_client;
+
   /// Connection
   HttpConnection *_http_connection;
 
