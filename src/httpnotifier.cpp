@@ -35,7 +35,8 @@ HttpNotifier::HttpNotifier(HttpResolver* resolver, const std::string& notify_url
                                   nullptr);
 
     _http_connection = new HttpConnection(url_server,
-                                          _http_client);
+                                          _http_client,
+                                          url_scheme);
     _http_url_path = url_path;
   }
 }
@@ -75,29 +76,14 @@ bool HttpNotifier::send_notify(const std::string& impu,
 
   std::string body = buffer.GetString();
 
-  std::string server;
-  std::string scheme;
-  std::string path;
-  bool ok = Utils::parse_http_url(_http_url_path, scheme, server, path);
-
-  if (ok)
-  {
-    std::unique_ptr<HttpRequest> req(new HttpRequest(server, 
-                                                     scheme, 
-                                                     _http_client, 
-                                                     HttpClient::RequestType::POST, 
-                                                     _http_url_path));
-    req->set_body(body);
-    req->set_sas_trail(trail);
-    HttpResponse resp = req->send();
-    HTTPCode http_code = resp.get_rc();
-    ok = (http_code == HTTP_OK);
-  }
-  //LCOV_EXCL_START
-  else
-  {
-    TRC_DEBUG("Invalid URL for replication: %s", _http_url_path.c_str());
-  }
-  //LCOV_EXCL_STOP
-  return ok;
+  std::unique_ptr<HttpRequest> req(new HttpRequest(_http_connection->_server, 
+                                                   _http_connection->_scheme, 
+                                                   _http_client, 
+                                                   HttpClient::RequestType::POST, 
+                                                   _http_url_path));
+  req->set_body(body);
+  req->set_sas_trail(trail);
+  HttpResponse resp = req->send();
+  HTTPCode http_code = resp.get_rc();
+  return (http_code == HTTP_OK);
 }
