@@ -88,6 +88,7 @@ memento-as_test_SOURCES := ${MEMENTO_AS_COMMON_SOURCES} \
 COMMON_CPPFLAGS := -I${ROOT}/include \
                    -I${ROOT}/usr/include \
                    -I${ROOT}/modules/cpp-common/include \
+                   -I${ROOT}/modules/clearwater-s4/include \
                    -I${ROOT}/modules/sas-client/include \
                    -I${ROOT}/modules/app-servers/include \
                    -I${ROOT}/modules/rapidjson/include \
@@ -128,7 +129,7 @@ memento-as_test_LDFLAGS := ${COMMON_LDFLAGS} \
                            -lz \
                            $(shell PKG_CONFIG_PATH=${ROOT}/usr/lib/pkgconfig pkg-config --libs libpjproject)
 
-VPATH = ${ROOT}/src:${ROOT}/modules/cpp-common/src:${ROOT}/plugins/memento-as/src:${ROOT}/plugins/memento-as/ut:${ROOT}/modules/cpp-common/test_utils:${ROOT}/src/ut:${ROOT}/plugins/memento-as/modules/memento-common/src:${ROOT}/modules/sas-client/source:${ROOT}/plugins/memento-as/modules/memento-common/ut
+VPATH = ${ROOT}/src:${ROOT}/modules/cpp-common/src:${ROOT}/modules/clearwater-s4/src:${ROOT}/plugins/memento-as/src:${ROOT}/plugins/memento-as/ut:${ROOT}/modules/cpp-common/test_utils:${ROOT}/src/ut:${ROOT}/plugins/memento-as/modules/memento-common/src:${ROOT}/modules/sas-client/source:${ROOT}/plugins/memento-as/modules/memento-common/ut
 
 include ${ROOT}/build-infra/cpp.mk
 
