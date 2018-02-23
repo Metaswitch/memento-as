@@ -88,6 +88,7 @@ memento-as_test_SOURCES := ${MEMENTO_AS_COMMON_SOURCES} \
 COMMON_CPPFLAGS := -I${ROOT}/include \
                    -I${ROOT}/usr/include \
                    -I${ROOT}/modules/cpp-common/include \
+                   -I${ROOT}/modules/clearwater-s4/include \
                    -I${ROOT}/modules/sas-client/include \
                    -I${ROOT}/modules/app-servers/include \
                    -I${ROOT}/modules/rapidjson/include \
