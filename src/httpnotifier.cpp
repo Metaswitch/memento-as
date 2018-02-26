@@ -76,14 +76,13 @@ bool HttpNotifier::send_notify(const std::string& impu,
 
   std::string body = buffer.GetString();
 
-  std::unique_ptr<HttpRequest> req(new HttpRequest(_http_connection->_server, 
-                                                   _http_connection->_scheme, 
-                                                   _http_client, 
-                                                   HttpClient::RequestType::POST, 
-                                                   _http_url_path));
-  req->set_body(body);
-  req->set_sas_trail(trail);
-  HttpResponse resp = req->send();
-  HTTPCode http_code = resp.get_rc();
+  HTTPCode http_code = 
+    _http_connection->create_request(HttpClient::RequestType::POST, 
+                                    _http_url_path)
+     .set_body(body)
+     .set_sas_trail(trail)
+     .send()
+     .get_rc();
+
   return (http_code == HTTP_OK);
 }
