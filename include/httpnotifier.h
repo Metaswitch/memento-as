@@ -18,10 +18,8 @@
 class HttpNotifier
 {
 public:
-  /// Constructor
   HttpNotifier(HttpResolver* resolver, const std::string& notify_url);
 
-  /// Destructor
   virtual ~HttpNotifier();
 
   /// This function sends a HTTP POST to the notify URL, to notify it of the
@@ -33,16 +31,12 @@ public:
 
 private:
 
-  /// Resolver
   HttpResolver *_http_resolver;
 
-  /// Client
   HttpClient *_http_client;
 
-  /// Connection
   HttpConnection *_http_connection;
 
-  /// URL path
   std::string _http_url_path;
 };
 
