@@ -52,6 +52,7 @@ memento-as_test_SOURCES := ${MEMENTO_AS_COMMON_SOURCES} \
                            custom_headers.cpp \
                            curl_interposer.cpp \
                            dnscachedresolver.cpp \
+                           static_dns_cache.cpp \
                            dnsparser.cpp \
                            exception_handler.cpp \
                            fakecurl.cpp \
