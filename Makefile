@@ -59,7 +59,7 @@ memento-as_test_SOURCES := ${MEMENTO_AS_COMMON_SOURCES} \
                            faketransport_tcp.cpp \
                            health_checker.cpp \
                            httpclient.cpp \
-                           httpconnection.cpp \
+                           http_request.cpp \
                            http_connection_pool.cpp \
                            httpnotifier_test.cpp \
                            httpstack.cpp \

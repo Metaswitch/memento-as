@@ -18,6 +18,7 @@
 /// Constructor.
 HttpNotifier::HttpNotifier(HttpResolver* resolver, const std::string& notify_url) :
   _http_resolver(resolver),
+  _http_client(NULL),
   _http_connection(NULL)
 {
   std::string url_scheme;
@@ -26,11 +27,16 @@ HttpNotifier::HttpNotifier(HttpResolver* resolver, const std::string& notify_url
   if (Utils::parse_http_url(notify_url, url_scheme, url_server, url_path) &&
       !url_server.empty())
   {
+    _http_client = new HttpClient(true,
+                                  _http_resolver,
+                                  nullptr,
+                                  nullptr,
+                                  SASEvent::HttpLogLevel::PROTOCOL,
+                                  nullptr);
+
     _http_connection = new HttpConnection(url_server,
-                                          true,
-                                          _http_resolver,
-                                          SASEvent::HttpLogLevel::PROTOCOL,
-                                          NULL);
+                                          _http_client,
+                                          url_scheme);
     _http_url_path = url_path;
   }
 }
@@ -41,6 +47,10 @@ HttpNotifier::~HttpNotifier()
   if (_http_connection != NULL)
   {
     delete _http_connection; _http_connection = NULL;
+  }
+  if (_http_client != NULL)
+  {
+    delete _http_client; _http_client = NULL;
   }
 }
 
@@ -64,12 +74,15 @@ bool HttpNotifier::send_notify(const std::string& impu,
   rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
   notification.Accept(writer);
 
-  std::map<std::string, std::string> headers;
   std::string body = buffer.GetString();
 
-  HTTPCode http_code = _http_connection->send_post(_http_url_path,
-                                                   headers,
-                                                   body,
-                                                   trail);
+  HTTPCode http_code = 
+    _http_connection->create_request(HttpClient::RequestType::POST, 
+                                    _http_url_path)
+     .set_body(body)
+     .set_sas_trail(trail)
+     .send()
+     .get_rc();
+
   return (http_code == HTTP_OK);
 }
