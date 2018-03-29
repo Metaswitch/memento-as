@@ -10,104 +10,13 @@
  */
 
 #include "cfgoptions.h"
+#include "cfgoptions_helper.h"
 #include "sproutletplugin.h"
 #include "mementoappserver.h"
 #include "call_list_store.h"
 #include "sproutletappserver.h"
 #include "memento_as_alarmdefinition.h"
 #include "log.h"
-
-void set_memento_opt_str(std::multimap<std::string, std::string>& memento_opts,
-                         std::string opt_name,
-                         bool required_opt,
-                         std::string& opt,
-                         bool& memento_enabled)
-{
-  if (!memento_enabled)
-  {
-    // If memento is already disabled, don't attempt to parse another option
-    return;
-  }
-
-  std::multimap<std::string, std::string>::iterator
-    opt_it = memento_opts.find(opt_name);
-
-  if (opt_it != memento_opts.end())
-  {
-    opt = opt_it->second;
-    TRC_INFO("%s memento-as option '%s': '%s'",
-             required_opt ? "Set" : "Overwrote",
-             opt_name.c_str(),
-             opt.c_str());
-  }
-  else if (required_opt)
-  {
-    TRC_STATUS("Required memento-as option '%s' not set. Disabling memento-as.",
-               opt_name.c_str());
-    memento_enabled = false;
-  }
-  else
-  {
-    TRC_INFO("memento-as option '%s' not set. Defaulting to: '%s'",
-             opt_name.c_str(),
-             opt.c_str());
-  }
-}
-
-void set_memento_opt_int(std::multimap<std::string, std::string>& memento_opts,
-                         std::string opt_name,
-                         bool required_opt,
-                         int& opt,
-                         bool& memento_enabled)
-{
-  if (!memento_enabled)
-  {
-    // If memento is already disabled, don't attempt to parse another option
-    return;
-  }
-
-  std::multimap<std::string, std::string>::iterator
-    opt_it = memento_opts.find(opt_name);
-
-  bool option_read_success = false;
-  int as_int = -1;
-
-  if (opt_it != memento_opts.end())
-  {
-    as_int = atoi(opt_it->second.c_str());
-    if (opt_it->second.c_str() == std::to_string(as_int))
-    {
-      option_read_success = true;
-    }
-    else
-    {
-      TRC_WARNING("Failed to parse value for memento-as option %s",
-                  opt_name.c_str());
-      option_read_success = false;
-    }
-  }
-
-  if (option_read_success)
-  {
-    opt = as_int;
-    TRC_INFO("%s memento-as option '%s': %d",
-             required_opt ? "Set" : "Overwrote",
-             opt_name.c_str(),
-             opt);
-  }
-  else if (required_opt)
-  {
-    TRC_STATUS("Required memento-as option '%s' not set. Disabling memento-as.",
-               opt_name.c_str());
-    memento_enabled = false;
-  }
-  else
-  {
-    TRC_INFO("memento-as option '%s' not set. Defaulting to: %d",
-             opt_name.c_str(),
-             opt);
-  }
-}
 
 class MementoPlugin : public SproutletPlugin
 {
@@ -177,69 +86,78 @@ bool MementoPlugin::load(struct options& opt, std::list<Sproutlet*>& sproutlets)
     TRC_DEBUG("Got Memento options map");
     std::multimap<std::string, std::string>& memento_opts = memento_it->second;
 
-    set_memento_opt_int(memento_opts,
-                        "memento",
-                        true,
-                        memento_port,
-                        memento_enabled);
+    set_plugin_opt_int(memento_opts,
+                       "memento",
+                       "memento-as",
+                       true,
+                       memento_port,
+                       memento_enabled);
 
     if (memento_port < 0)
     {
       TRC_STATUS("Memento port set to a value of less than zero (%d). Disabling memento.",
                  memento_port);
-        memento_enabled = false;
+      memento_enabled = false;
     }
 
-    set_memento_opt_str(memento_opts,
-                        "memento_prefix",
-                        false,
-                        memento_prefix,
-                        memento_enabled);
+    set_plugin_opt_str(memento_opts,
+                       "memento_prefix",
+                       "memento-as",
+                       false,
+                       memento_prefix,
+                       memento_enabled);
 
     // Given the prefix, set the default uri
     memento_uri = "sip:" + memento_prefix + "." + opt.sprout_hostname + ";transport=TCP";
 
-    set_memento_opt_str(memento_opts,
-                        "memento_uri",
-                        false,
-                        memento_uri,
-                        memento_enabled);
+    set_plugin_opt_str(memento_opts,
+                       "memento_uri",
+                       "memento-as",
+                       false,
+                       memento_uri,
+                       memento_enabled);
 
-    set_memento_opt_int(memento_opts,
-                        "memento_threads",
-                        false,
-                        memento_threads,
-                        memento_enabled);
+    set_plugin_opt_int(memento_opts,
+                       "memento_threads",
+                       "memento-as",
+                       false,
+                       memento_threads,
+                       memento_enabled);
 
-    set_memento_opt_str(memento_opts,
-                        "memento_notify_url",
-                        false,
-                        memento_notify_url,
-                        memento_enabled);
+    set_plugin_opt_str(memento_opts,
+                       "memento_notify_url",
+                       "memento-as",
+                       false,
+                       memento_notify_url,
+                       memento_enabled);
 
-    set_memento_opt_str(memento_opts,
-                        "cassandra",
-                        false,
-                        cassandra,
-                        memento_enabled);
+    set_plugin_opt_str(memento_opts,
+                       "cassandra",
+                       "memento-as",
+                       false,
+                       cassandra,
+                       memento_enabled);
 
-    set_memento_opt_int(memento_opts,
-                        "call_list_ttl",
-                        false,
-                        call_list_ttl,
-                        memento_enabled);
+    set_plugin_opt_int(memento_opts,
+                       "call_list_ttl",
+                       "memento-as",
+                       false,
+                       call_list_ttl,
+                       memento_enabled);
 
-    set_memento_opt_int(memento_opts,
-                        "max_call_list_length",
-                        false,
-                        max_call_list_length,
-                        memento_enabled);
+    set_plugin_opt_int(memento_opts,
+                       "max_call_list_length",
+                       "memento-as",
+                       false,
+                       max_call_list_length,
+                       memento_enabled);
 
-    set_memento_opt_int(memento_opts,
-                        "cass_target_latency_us",
-                        false,
-                        cass_target_latency_us,
-                        memento_enabled);
+    set_plugin_opt_int(memento_opts,
+                       "cass_target_latency_us",
+                       "memento-as",
+                       false,
+                       cass_target_latency_us,
+                       memento_enabled);
 
     if (((max_call_list_length == 0) &&
          (call_list_ttl == 0)))
